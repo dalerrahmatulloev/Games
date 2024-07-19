@@ -5,11 +5,16 @@ import packManTop from "../../assets/packManTop.png";
 import packManDown from "../../assets/packManDown.png";
 
 export default function Packman() {
+  const [game, setGame] = useState(0);
   const [pause, setPause] = useState(true);
   const [user, setUser] = useState(packManRight);
   const [left, setLeft] = useState(0);
   const [top, setTop] = useState(0);
   const [coin, setCoin] = useState(0);
+  const [user2, setUser2] = useState(packManLeft);
+  const [left2, setLeft2] = useState(450);
+  const [top2, setTop2] = useState(0);
+  const [coin2, setCoin2] = useState(0);
   const [leftApple, setLeftApple] = useState(50);
   const [topApple, setTopApple] = useState(50);
   const [seconds, setSeconds] = useState(60);
@@ -21,21 +26,46 @@ export default function Packman() {
     setTopApple(newTopApple - (newTopApple % 50));
   };
 
-  useEffect(() => {
-    if (seconds === 0) {
-      alert(`Finish, you have ${coin} coins!`);
-      setSeconds(60);
-      setCoin(0);
-      generateApplePosition();
-      setLeft(0);
-      setTop(0);
-      setPause(true);
-      localStorage.setItem(
-        "coin",
-        Math.max(coin, localStorage.getItem("coin") || 0)
-      );
-    }
-  }, [seconds]);
+  game == 1
+    ? useEffect(() => {
+        if (seconds === 0) {
+          alert(`Finish, you have ${coin} coins!`);
+          setSeconds(60);
+          setCoin(0);
+          generateApplePosition();
+          setLeft(0);
+          setTop(0);
+          setPause(true);
+          localStorage.setItem(
+            "coin",
+            Math.max(coin, localStorage.getItem("coin") || 0)
+          );
+        }
+      }, [seconds])
+    : useEffect(() => {
+        if (seconds === 0) {
+          alert(
+            `Finish, right player has ${coin} coins, left player has ${coin2} coins.${
+              coin == coin2
+                ? " Draw!!!"
+                : ` Win, ${coin > coin2 ? "left" : "right"} players!!!`
+            }`
+          );
+          setSeconds(60);
+          setCoin(0);
+          setCoin2(0);
+          generateApplePosition();
+          setLeft(0);
+          setTop(0);
+          setLeft2(450);
+          setTop2(0);
+          setPause(true);
+          localStorage.setItem(
+            "coin",
+            Math.max(coin, localStorage.getItem("coin") || 0)
+          );
+        }
+      }, [seconds]);
 
   useEffect(() => {
     generateApplePosition();
@@ -51,51 +81,118 @@ export default function Packman() {
     return () => clearInterval(interval);
   }, [pause]);
 
-  useEffect(() => {
-    if (top === topApple && left === leftApple) {
-      setCoin((prevCoin) => prevCoin + 1);
-      generateApplePosition();
-    }
-  }, [top, left]);
+  game == 1
+    ? useEffect(() => {
+        if (top === topApple && left === leftApple) {
+          setCoin((prevCoin) => prevCoin + 1);
+          generateApplePosition();
+        }
+      }, [top, left])
+    : useEffect(() => {
+        console.log(top, topApple, left, leftApple);
+        if (top === topApple && left === leftApple) {
+          setCoin((prevCoin) => prevCoin + 1);
+          generateApplePosition();
+        } else if (top2 === topApple && left2 === leftApple) {
+          setCoin2((prevCoin) => prevCoin + 1);
+          generateApplePosition();
+        }
+      }, [top2, left2, top, left]);
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      switch (event.code) {
-        case "Enter":
-          setCoin(coin=> coin+=1);
-          break;
-        case "KeyW":
-        case "ArrowUp":
-          if (!pause) {
-            setTop((prevTop) => (prevTop !== 0 ? prevTop - 50 : 450));
+    let handleKeyDown;
+    game == 1
+      ? (handleKeyDown = (event) => {
+          switch (event.code) {
+            case "Enter":
+              setCoin((coin) => (coin += 1));
+              break;
+            case "KeyW":
+            case "ArrowUp":
+              if (!pause) {
+                setTop((prevTop) => (prevTop !== 0 ? prevTop - 50 : 450));
+              }
+              setUser(packManTop);
+              break;
+            case "KeyS":
+            case "ArrowDown":
+              if (!pause) {
+                setTop((prevTop) => (prevTop !== 450 ? prevTop + 50 : 0));
+              }
+              setUser(packManDown);
+              break;
+            case "KeyA":
+            case "ArrowLeft":
+              if (!pause) {
+                setLeft((prevLeft) => (prevLeft !== 0 ? prevLeft - 50 : 450));
+              }
+              setUser(packManLeft);
+              break;
+            case "KeyD":
+            case "ArrowRight":
+              if (!pause) {
+                setLeft((prevLeft) => (prevLeft !== 450 ? prevLeft + 50 : 0));
+              }
+              setUser(packManRight);
+              break;
+            default:
+              break;
           }
-          setUser(packManTop);
-          break;
-        case "KeyS":
-        case "ArrowDown":
-          if (!pause) {
-            setTop((prevTop) => (prevTop !== 450 ? prevTop + 50 : 0));
+        })
+      : (handleKeyDown = (event) => {
+          switch (event.code) {
+            case "KeyW":
+              if (!pause) {
+                setTop((prevTop) => (prevTop !== 0 ? prevTop - 50 : 450));
+              }
+              setUser(packManTop);
+              break;
+            case "ArrowUp":
+              if (!pause) {
+                setTop2((prevTop) => (prevTop !== 0 ? prevTop - 50 : 450));
+              }
+              setUser2(packManTop);
+              break;
+            case "KeyS":
+              if (!pause) {
+                setTop((prevTop) => (prevTop !== 450 ? prevTop + 50 : 0));
+              }
+              setUser(packManDown);
+              break;
+            case "ArrowDown":
+              if (!pause) {
+                setTop2((prevTop) => (prevTop !== 450 ? prevTop + 50 : 0));
+              }
+              setUser2(packManDown);
+              break;
+            case "KeyA":
+              if (!pause) {
+                setLeft((prevLeft) => (prevLeft !== 0 ? prevLeft - 50 : 450));
+              }
+              setUser(packManLeft);
+              break;
+            case "ArrowLeft":
+              if (!pause) {
+                setLeft2((prevLeft) => (prevLeft !== 0 ? prevLeft - 50 : 450));
+              }
+              setUser2(packManLeft);
+              break;
+            case "KeyD":
+              if (!pause) {
+                setLeft((prevLeft) => (prevLeft !== 450 ? prevLeft + 50 : 0));
+              }
+              setUser(packManRight);
+              break;
+            case "ArrowRight":
+              if (!pause) {
+                setLeft2((prevLeft) => (prevLeft !== 450 ? prevLeft + 50 : 0));
+              }
+              setUser2(packManRight);
+              break;
+            default:
+              break;
           }
-          setUser(packManDown);
-          break;
-        case "KeyA":
-        case "ArrowLeft":
-          if (!pause) {
-            setLeft((prevLeft) => (prevLeft !== 0 ? prevLeft - 50 : 450));
-          }
-          setUser(packManLeft);
-          break;
-        case "KeyD":
-        case "ArrowRight":
-          if (!pause) {
-            setLeft((prevLeft) => (prevLeft !== 450 ? prevLeft + 50 : 0));
-          }
-          setUser(packManRight);
-          break;
-        default:
-          break;
-      }
-    };
+        });
 
     window.addEventListener("keydown", handleKeyDown);
     return () => {
@@ -105,14 +202,70 @@ export default function Packman() {
 
   return (
     <>
+      {game == 0 ? (
+        <div className="absolute flex justify-center items-center w-full z-50 h-screen bg-[#0000007e]">
+          <div className="bg-white relative flex gap-[30px] p-[19px_40px]">
+            <button
+              onClick={() => setGame(1)}
+              className="absolute text-[23px] top-[-7px] right-[3px]"
+            >
+              &times;
+            </button>
+
+            <button
+              onClick={() => {
+                setGame(1);
+                setPause(true);
+                setUser(packManRight);
+                setLeft(0);
+                setTop(0);
+                setCoin(0);
+                setUser2(packManLeft);
+                setLeft2(450);
+                setTop2(0);
+                setCoin2(0);
+                setLeftApple(50);
+                setTopApple(50);
+                setSeconds(60);
+              }}
+              className="p-[3px_13px] bg-[red] text-white rounded-md"
+            >
+              Solo
+            </button>
+
+            <button
+              onClick={() => {
+                setGame(2);
+                setPause(true);
+                setUser(packManRight);
+                setLeft(0);
+                setTop(0);
+                setCoin(0);
+                setUser2(packManLeft);
+                setLeft2(450);
+                setTop2(0);
+                setCoin2(0);
+                setLeftApple(50);
+                setTopApple(50);
+                setSeconds(60);
+              }}
+              className="p-[3px_13px] bg-[green] text-white rounded-md"
+            >
+              Duo
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex py-[20px] justify-center gap-[30px]">
         <button
           onClick={() => (pause ? setPause(false) : setPause(true))}
-          className="bg-red-600 text-white p-[3px_10px] rounded-md"
+          className=" text-white p-[3px_10px] rounded-md"
           style={{ background: `${pause ? "green" : "red"}` }}
         >
           {pause ? "Start" : "Pause"}
         </button>
+
         <button
           className="bg-orange-600 text-white p-[3px_10px] rounded-md"
           onClick={() => {
@@ -127,9 +280,26 @@ export default function Packman() {
         >
           Restart
         </button>
+
+        <button
+          onClick={() => {
+            setGame(0), setPause(true);
+          }}
+          className="bg-emerald-600 text-white p-[3px_10px] rounded-md"
+        >
+          Game
+        </button>
       </div>
+      {game == 2 ? (
+        <div className="text-center">
+          <p>Timer: {seconds}sec.</p>
+        </div>
+      ) : null}
 
       <div className="flex justify-center gap-[100px] items-center">
+        {game == 2 ? (
+          <h1 className="text-[28px]">Left player coins: {coin}</h1>
+        ) : null}
         <div className="border-[2px] overflow-hidden relative border-black h-[502px] w-[502px]">
           <div
             className="h-[50px] w-[50px] absolute flex justify-center"
@@ -137,6 +307,15 @@ export default function Packman() {
           >
             <img className="h-full" src={user} alt="" />
           </div>
+
+          {game == 2 ? (
+            <div
+              className="h-[50px] w-[50px] absolute flex justify-center"
+              style={{ left: `${left2}px`, top: `${top2}px` }}
+            >
+              <img className="h-full" src={user2} alt="" />
+            </div>
+          ) : null}
 
           <div
             className="h-[50px] w-[50px] absolute"
@@ -150,11 +329,15 @@ export default function Packman() {
           </div>
         </div>
 
-        <div className="">
-          <p>Timer: {seconds}sec.</p>
-          <h1 className="text-[28px]">Your coins: {coin}</h1>
-          <h1>Your record: {localStorage.getItem("coin") || 0}</h1>
-        </div>
+        {game == 1 ? (
+          <div>
+            <p>Timer: {seconds}sec.</p>
+            <h1 className="text-[28px]">Your coins: {coin}</h1>
+            <h1>Your record: {localStorage.getItem("coin") || 0}</h1>
+          </div>
+        ) : (
+          <h1 className="text-[28px]">Right player coins: {coin2}</h1>
+        )}
       </div>
     </>
   );
